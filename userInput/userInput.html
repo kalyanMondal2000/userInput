@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Spinning Cube</title>
+    <style>
+        body { margin: 0; }
+        header{color:white}
+    </style>
+</head>
+<header>Controls: <br>
+    W/S control height<br>
+    A/D control left/right<br>
+    Q/E control depth</header>
+<body>
+    <script type="importmap">
+        {
+          "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@v0.169.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@v0.169.0/examples/jsm/"
+          }
+        }
+    </script>
+    
+    <script type="module">
+import * as THREE from 'three';
+
+// Create a scene, camera, renderer
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+camera.position.z = 10;
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+
+// Set background color 
+renderer.setClearColor('black');
+
+// Create a cube
+const geometry = new THREE.BoxGeometry(1, 1, 1);
+const material = new THREE.MeshBasicMaterial({ color: 'white' });
+const cube = new THREE.Mesh(geometry, material);
+scene.add(cube);
+
+// Set background color 
+document.body.style.backgroundColor = 'black';
+
+// The edges of the cube are a separate object
+var cubeEdges = new THREE.LineSegments(
+  new THREE.EdgesGeometry(cube.geometry),
+  new THREE.LineBasicMaterial({ color: 'red', linewidth: 1})
+);
+// Adding edges
+cube.add(cubeEdges);
+
+// Set up user input
+const moveSpeed = 0.25; 
+const acceleration = 0.25; 
+let moveDirection = new THREE.Vector3(0, 0, 0);
+const targetDirection = new THREE.Vector3(0, 0, 0);
+
+// event listeners
+document.addEventListener('keydown', (event) => {
+    //y axis
+    if (event.key === 'w') targetDirection.y = 1;
+    else if (event.key === 's') targetDirection.y = -1;
+    //x axis
+    else if (event.key === 'a') targetDirection.x = -1;
+    else if (event.key === 'd') targetDirection.x = 1;
+    //z axis/depth
+    else if(event.key == 'q') targetDirection.z = 1; 
+    else if(event.key == 'e') targetDirection.z = -1; 
+
+    event.preventDefault(); 
+});
+
+
+document.addEventListener('keyup', (event) => {
+    if (event.key === 'w' || event.key === 's') targetDirection.y = 0;
+    else if (event.key === 'a' || event.key === 'd') targetDirection.x = 0;
+    else if (event.key === 'q' || event.key === 'e') targetDirection.z = 0;
+});
+
+// Animation 
+function animate() {
+    requestAnimationFrame(animate);
+
+    
+    moveDirection.lerp(targetDirection.clone().normalize(), acceleration);
+    
+    
+    if (moveDirection.length() > 0) {
+        cube.position.add(moveDirection.clone().multiplyScalar(moveSpeed));
+    }
+
+    renderer.render(scene, camera);
+}
+
+animate();
+function render(time) {
+            time *= 0.001;  // convert time to seconds
+          
+            cube.rotation.x = time;
+            cube.rotation.y = time;
+          
+            renderer.render(scene, camera);
+          
+            requestAnimationFrame(render);
+          }
+document.addEventListener('keydown', (event) => {
+    //y axis
+    if (event.key === 'f') requestAnimationFrame(render);;
+    
+});
+    
+
+    </script>
+</body>
+</html>
